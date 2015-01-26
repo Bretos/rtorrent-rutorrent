@@ -21,7 +21,7 @@ Adding basic auth:
 
 Put .htpasswd into your /downloads volume root, the container will re-read .htpasswd each time it starts. To remote auth, simply remove .htpasswd and restart your container.
 
-Instructions on how to generate .htpasswd can be found here: [Nginx FAQ][1] 
+Instructions on how to generate .htpasswd can be found here: [Nginx FAQ][1]
 
     $ printf "John:$(openssl passwd -crypt V3Ry)\n" >> .htpasswd # this example uses crypt encryption
 
@@ -40,14 +40,18 @@ Generate a self-signed certificate:
 
     $ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nginx.key -out nginx.crt
 
-Nginx TLS/SSL is configured as follwoing:
+Nginx TLS/SSL is configured as follwoing (according to http://cipherli.st suggestions):
 
-     keepalive_timeout   60;
-     ssl_certificate      /etc/nginx/ssl/nginx.crt;
-     ssl_certificate_key  /etc/nginx/ssl/nginx.key;
-     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-     ssl_ciphers  "RC4:HIGH:!aNULL:!MD5:!kEDH";
-     add_header Strict-Transport-Security 'max-age=604800';
+        keepalive_timeout   60;
+        ssl_certificate      /etc/nginx/ssl/nginx.crt;
+        ssl_certificate_key  /etc/nginx/ssl/nginx.key;
+        ssl_ciphers "AES128+EECDH:AES128+EDH";
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+        ssl_prefer_server_ciphers on;
+        ssl_session_cache shared:SSL:10m;
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+
 
 (Actually, flaky SSL is disabled)
 
@@ -76,4 +80,3 @@ Access web-interface: enter http://your_host_address:8080 in a browser for insec
 
 
   [1]: http://wiki.nginx.org/Faq#How_do_I_generate_an_htpasswd_file_without_having_Apache_tools_installed.3F "Nginx FAQ"
-
